@@ -1,0 +1,26 @@
+{
+  "training_date": "2025-05-29T15:18:36.111890",
+  "model_type": "DeepRecommendationModel",
+  "framework": "PyTorch",
+  "pytorch_version": "2.2.0+cpu",
+  "data_shape": {
+    "n_samples": 5000,
+    "resume_features": 65,
+    "job_features": 63
+  },
+  "training_params": {
+    "device": "cpu",
+    "epochs_trained": 89,
+    "hidden_dims": [
+      512,
+      256,
+      128
+    ],
+    "use_sigmoid": true
+  },
+  "preprocessing": {
+    "pickle_saved": true,
+    "json_backup_saved": true,
+    "tokenizer_function": "tokenize_chinese"
+  }
+}
