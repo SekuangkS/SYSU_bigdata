@@ -1,0 +1,15 @@
+# config.yaml
+# 重排配置
+reranking:
+  diversity:
+    max_per_position: 3  # 每个岗位最多推荐人数
+    min_results: 5       # 最小结果数量
+    skill_coverage: true # 是否启用技能覆盖
+
+  business_rules:
+    blacklist: [10023, 10045]  # 简历黑名单ID
+    priority_conditions:       # 优先条件
+      - education: "博士"
+        experience: 5
+      - skills: ["机器学习", "深度学习"]
+        experience: 3

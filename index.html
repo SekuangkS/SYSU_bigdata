@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简历推荐系统</title>
+    <style>
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 80%;
+            max-width: 800px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f2f2f7;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #86868b;
+            transition: color 0.2s;
+        }
+
+        .close-modal:hover {
+            color: #1d1d1f;
+        }
+
+        .modal-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .modal-section {
+            margin-bottom: 20px;
+        }
+
+        .modal-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #f2f2f7;
+        }
+
+        .modal-subsection {
+            margin-bottom: 12px;
+        }
+
+        .modal-subsection-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1d1d1f;
+            margin-bottom: 6px;
+        }
+
+        .modal-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .modal-skill {
+            background: #f2f2f7;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #1d1d1f;
+        }
+
+        .modal-detail {
+            display: flex;
+            margin-bottom: 8px;
+        }
+
+        .modal-detail-label {
+            width: 100px;
+            font-size: 14px;
+            color: #86868b;
+            font-weight: 500;
+        }
+
+        .modal-detail-value {
+            flex: 1;
+            font-size: 14px;
+            color: #1d1d1f;
+        }
+
+        .modal-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .modal-skill {
+            background: #f2f2f7;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f7;
+            color: #1d1d1f;
+            line-height: 1.47059;
+            font-size: 17px;
+            font-weight: 400;
+        }
+
+        .container {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 0 22px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 88px 0 44px;
+        }
+
+        .header h1 {
+            font-size: 56px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 12px;
+            letter-spacing: -0.005em;
+        }
+
+        .header p {
+            font-size: 21px;
+            color: #86868b;
+            font-weight: 400;
+            margin-bottom: 20px;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            background: rgba(52, 199, 89, 0.1);
+            border-radius: 8px;
+            font-size: 14px;
+            color: #1b5e20;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: #34c759;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .status-offline .status-dot {
+            background: #ff3b30;
+        }
+
+        .status-offline {
+            background: rgba(255, 59, 48, 0.1);
+            color: #c62828;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 66px 0;
+        }
+
+        .stat-card {
+            background: #fff;
+            border-radius: 18px;
+            padding: 36px 24px;
+            text-align: center;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 600;
+            color: #007aff;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #86868b;
+            font-weight: 500;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #fff;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 44px;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 12px 20px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 15px;
+            color: #1d1d1f;
+            transition: all 0.15s ease-out;
+            border: none;
+            background: none;
+        }
+
+        .nav-tab.active {
+            background: #007aff;
+            color: #fff;
+            box-shadow: 0 1px 4px rgba(0, 122, 255, 0.3);
+        }
+
+        .nav-tab:not(.active):hover {
+            background: #f5f5f7;
+        }
+
+        .content-section {
+            background: #fff;
+            border-radius: 18px;
+            padding: 44px;
+            margin-bottom: 44px;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .section-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 15px;
+            font-weight: 500;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            padding: 12px 16px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            font-size: 17px;
+            background: #fff;
+            transition: border-color 0.15s ease-out;
+            -webkit-appearance: none;
+            appearance: none;
+            font-family: inherit;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #007aff;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 88px;
+            line-height: 1.47059;
+        }
+
+        .form-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease-out;
+            min-width: 120px;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: #007aff;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #0056cc;
+        }
+
+        .btn-secondary {
+            background: #f2f2f7;
+            color: #1d1d1f;
+        }
+
+        .btn-secondary:hover {
+            background: #e8e8ed;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .results {
+            margin-top: 44px;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .results-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+        }
+
+        .results-subtitle {
+            font-size: 15px;
+            color: #86868b;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 66px 20px;
+        }
+
+        .loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #f2f2f7;
+            border-top: 2px solid #007aff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 15px;
+            color: #86868b;
+        }
+
+        .result-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            transition: all 0.15s ease-out;
+        }
+
+        .result-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .result-name {
+            font-size: 19px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .result-score {
+            background: #007aff;
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .result-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .result-detail {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 11px;
+            color: #86868b;
+            font-weight: 500;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .detail-value {
+            font-size: 15px;
+            color: #1d1d1f;
+            font-weight: 500;
+        }
+
+        .skills-section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #f2f2f7;
+        }
+
+        .skills-label {
+            font-size: 11px;
+            color: #86868b;
+            font-weight: 500;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .skills-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .skill-tag {
+            background: #f2f2f7;
+            color: #1d1d1f;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .message {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .message-success {
+            background: rgba(52, 199, 89, 0.1);
+            color: #1b5e20;
+        }
+
+        .message-error {
+            background: rgba(255, 59, 48, 0.1);
+            color: #c62828;
+        }
+
+        .ai-badge {
+            display: inline-block;
+            background: #007aff;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .model-info {
+            background: rgba(0, 122, 255, 0.1);
+            color: #007aff;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 20px;
+            }
+
+            .header {
+                padding: 44px 0 32px;
+            }
+
+            .header h1 {
+                font-size: 40px;
+            }
+
+            .header p {
+                font-size: 19px;
+            }
+
+            .content-section {
+                padding: 32px 24px;
+                margin-bottom: 32px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .button-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .result-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .result-details {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .nav-tabs {
+                flex-direction: column;
+                gap: 2px;
+                padding: 2px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .stat-card {
+                padding: 24px 16px;
+            }
+
+            .result-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>简历推荐</h1>
+            <p>智能人才匹配</p>
+            <div class="status-indicator" id="status-indicator">
+                <div class="status-dot"></div>
+                <span id="status-text">检查中</span>
+            </div>
+        </div>
+
+        <!-- Model Info -->
+        <div class="message model-info" id="model-info" style="display: none;">
+            <span id="model-details">加载模型信息中...</span>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="total-resumes">-</div>
+                <div class="stat-label">简历总数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="total-positions">-</div>
+                <div class="stat-label">职位类型</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="avg-score">-</div>
+                <div class="stat-label">平均年龄</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">AI</div>
+                <div class="stat-label">深度学习</div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('recommend')">智能推荐<span class="ai-badge">AI</span></button>
+            <button class="nav-tab" onclick="switchTab('search')">简历搜索</button>
+            <button class="nav-tab" onclick="switchTab('manage')">数据管理</button>
+        </div>
+
+        <!-- Recommend Tab -->
+        <div id="recommend-tab" class="tab-content active">
+            <div class="content-section">
+                <h2 class="section-title">智能推荐</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">目标职位</label>
+                        <select id="recommend-position" class="form-select">
+                            <option value="">选择职位</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">最低学历</label>
+                        <select id="recommend-education" class="form-select">
+                            <option value="">不限</option>
+                            <option value="专科">专科</option>
+                            <option value="本科">本科</option>
+                            <option value="硕士及以上">硕士及以上</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">工作经验</label>
+                        <input type="number" id="recommend-experience" class="form-input" min="0" max="20" value="2" placeholder="年">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">年龄上限</label>
+                        <input type="number" id="recommend-age" class="form-input" min="18" max="65" value="35" placeholder="岁">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">技能要求</label>
+                    <textarea id="recommend-skills" class="form-textarea" placeholder="请输入技能关键词，用空格分隔"></textarea>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="getRecommendations()">开始推荐</button>
+                    <button class="btn btn-secondary" onclick="clearRecommendForm()">重置</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Tab -->
+        <div id="search-tab" class="tab-content">
+            <div class="content-section">
+                <h2 class="section-title">简历搜索</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">职位</label>
+                        <select id="search-position" class="form-select">
+                            <option value="">不限</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">学历</label>
+                        <select id="search-education" class="form-select">
+                            <option value="">不限</option>
+                            <option value="专科">专科</option>
+                            <option value="本科">本科</option>
+                            <option value="硕士及以上">硕士及以上</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">性别</label>
+                        <select id="search-gender" class="form-select">
+                            <option value="">不限</option>
+                            <option value="男">男</option>
+                            <option value="女">女</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">年龄范围</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="number" id="search-age-min" class="form-input" min="18" max="65" value="18" placeholder="最小" style="flex: 1;">
+                            <input type="number" id="search-age-max" class="form-input" min="18" max="65" value="65" placeholder="最大" style="flex: 1;">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">技能关键词</label>
+                        <input type="text" id="search-skills" class="form-input" placeholder="例如：Java">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">结果数量</label>
+                        <input type="number" id="search-limit" class="form-input" min="1" max="100" value="20">
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="searchResumes()">搜索</button>
+                    <button class="btn btn-secondary" onclick="clearSearchForm()">重置</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manage Tab -->
+        <div id="manage-tab" class="tab-content">
+            <div class="content-section">
+                <h2 class="section-title">数据管理</h2>
+                <div class="form-group">
+                    <label class="form-label">上传简历数据</label>
+                    <input type="file" id="data-file" class="form-input" accept=".csv">
+                    <p style="margin-top: 8px; color: #86868b; font-size: 14px;">
+                        支持CSV格式，上传后请重新训练模型
+                    </p>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="uploadDataFile()">上传数据</button>
+                    <button class="btn btn-secondary" onclick="triggerRetrain()">重新训练</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="results-section" class="results" style="display: none;">
+            <div class="results-header">
+                <h2 class="results-title" id="results-title">推荐结果</h2>
+                <p class="results-subtitle" id="results-subtitle">找到匹配结果</p>
+            </div>
+            <div id="results-container"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSystemStatus();
+            loadPositions();
+            loadStats();
+            loadModelInfo();
+        });
+
+        async function checkSystemStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/api/health`);
+                const data = await response.json();
+
+                const indicator = document.getElementById('status-indicator');
+                const statusText = document.getElementById('status-text');
+
+                if (data.status === 'healthy') {
+                    indicator.className = 'status-indicator';
+                    statusText.textContent = '运行正常';
+                } else {
+                    indicator.className = 'status-indicator status-offline';
+                    statusText.textContent = data.status === 'model_not_loaded' ? '模型未加载' : '离线';
+                }
+            } catch (error) {
+                const indicator = document.getElementById('status-indicator');
+                const statusText = document.getElementById('status-text');
+                indicator.className = 'status-indicator status-offline';
+                statusText.textContent = '连接失败';
+            }
+        }
+
+        async function loadModelInfo() {
+            try {
+                const response = await fetch(`${API_BASE}/api/model/info`);
+                const data = await response.json();
+
+                const modelInfo = document.getElementById('model-info');
+                const modelDetails = document.getElementById('model-details');
+
+                if (data.status === 'loaded') {
+                    const trainingInfo = data.training_history;
+                    modelDetails.innerHTML = `
+                        深度学习模型 | 训练轮次 ${trainingInfo.epochs_trained || 0} |
+                        验证损失 ${trainingInfo.final_val_loss ? trainingInfo.final_val_loss.toFixed(4) : 'N/A'}
+                    `;
+                    modelInfo.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('加载模型信息失败:', error);
+            }
+        }
+
+        async function loadPositions() {
+            try {
+                const response = await fetch(`${API_BASE}/api/positions`);
+                const data = await response.json();
+
+                if (data.positions) {
+                    const selects = ['recommend-position', 'search-position'];
+
+                    selects.forEach(selectId => {
+                        const select = document.getElementById(selectId);
+                        const currentValue = select.value;
+                        select.innerHTML = selectId === 'search-position' ? '<option value="">不限</option>' : '<option value="">选择职位</option>';
+
+                        data.positions.forEach(position => {
+                            const option = document.createElement('option');
+                            option.value = position;
+                            option.textContent = position;
+                            select.appendChild(option);
+                        });
+
+                        if (currentValue) select.value = currentValue;
+                    });
+                }
+            } catch (error) {
+                console.error('加载职位失败:', error);
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE}/api/stats`);
+                const data = await response.json();
+
+                if (data.total_resumes) {
+                    document.getElementById('total-resumes').textContent = data.total_resumes.toLocaleString();
+                    document.getElementById('total-positions').textContent = Object.keys(data.positions || {}).length;
+
+                    if (data.age_stats && data.age_stats.mean) {
+                        document.getElementById('avg-score').textContent = data.age_stats.mean.toFixed(1);
+                    }
+                }
+            } catch (error) {
+                console.error('加载统计失败:', error);
+            }
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            event.target.classList.add('active');
+
+            document.getElementById('results-section').style.display = 'none';
+        }
+
+        async function getRecommendations() {
+            const position = document.getElementById('recommend-position').value;
+            if (!position) {
+                showMessage('请选择目标职位', 'error');
+                return;
+            }
+
+            const jobRequirements = {
+                position: position,
+                skills: document.getElementById('recommend-skills').value,
+                min_education: document.getElementById('recommend-education').value,
+                min_experience: parseInt(document.getElementById('recommend-experience').value) || 0,
+                max_age: parseInt(document.getElementById('recommend-age').value) || 100,
+                top_k: 10
+            };
+
+            await makeRequest('/api/recommend/deep', jobRequirements, '智能推荐');
+        }
+
+        async function searchResumes() {
+            const params = {
+                position: document.getElementById('search-position').value,
+                education: document.getElementById('search-education').value,
+                gender: document.getElementById('search-gender').value,
+                min_age: parseInt(document.getElementById('search-age-min').value) || 18,
+                max_age: parseInt(document.getElementById('search-age-max').value) || 65,
+                skills: document.getElementById('search-skills').value,
+                limit: parseInt(document.getElementById('search-limit').value) || 20
+            };
+
+            await makeRequest('/api/search', params, '搜索结果');
+        }
+
+        async function uploadDataFile() {
+            const fileInput = document.getElementById('data-file');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                showMessage('请选择要上传的CSV文件', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                showLoading('上传中');
+
+                const response = await fetch(`${API_BASE}/api/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    showMessage(`上传成功`, 'success');
+                } else {
+                    showMessage(data.error || '上传失败', 'error');
+                }
+            } catch (error) {
+                console.error('上传失败:', error);
+                showMessage('上传失败', 'error');
+            }
+        }
+
+        async function triggerRetrain() {
+            try {
+                const response = await fetch(`${API_BASE}/api/retrain`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+                showMessage(`请在终端运行：python train.py`, 'success');
+            } catch (error) {
+                showMessage('请手动运行：python train.py', 'error');
+            }
+        }
+
+        async function makeRequest(endpoint, params, title) {
+            showLoading();
+
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(params)
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    displayResults(data.recommendations || data.resumes, title, data);
+                } else {
+                    showMessage(data.error || '请求失败', 'error');
+                }
+            } catch (error) {
+                console.error('请求失败:', error);
+                showMessage('网络连接失败', 'error');
+            }
+        }
+
+        function showLoading(message = '分析中') {
+            const resultsSection = document.getElementById('results-section');
+            const resultsContainer = document.getElementById('results-container');
+            const resultsTitle = document.getElementById('results-title');
+            const resultsSubtitle = document.getElementById('results-subtitle');
+
+            resultsTitle.textContent = message;
+            resultsSubtitle.textContent = '请稍候';
+
+            resultsContainer.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p class="loading-text">AI正在分析</p>
+                </div>
+            `;
+
+            resultsSection.style.display = 'block';
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function displayResults(results, title, responseData) {
+            const resultsContainer = document.getElementById('results-container');
+            const resultsTitle = document.getElementById('results-title');
+            const resultsSubtitle = document.getElementById('results-subtitle');
+
+            resultsTitle.textContent = title;
+
+            if (!results || results.length === 0) {
+                resultsSubtitle.textContent = '未找到匹配结果';
+                resultsContainer.innerHTML = `
+                    <div class="message message-error">
+                        未找到符合条件的简历
+                    </div>
+                `;
+                return;
+            }
+
+            resultsSubtitle.textContent = `找到 ${results.length} 位候选人`;
+
+            let html = `<div class="message message-success">推荐完成</div>`;
+
+            results.forEach((result, index) => {
+                const skills = result.skills ?
+                    result.skills.split(' ').filter(s => s && s !== 'NULL').slice(0, 6) : [];
+
+                const score = result.score ? (result.score * 100) :
+                             (result.comprehensive_score ? (result.comprehensive_score * 20) : 75);
+
+                html += `
+                    <div class="result-card">
+                        <div class="result-header">
+                            <div class="result-name">${result.name || '候选人'}</div>
+                            <div class="result-score">${score.toFixed(0)}%</div>
+                        </div>
+
+                        <div class="result-details">
+                            <div class="result-detail">
+                                <div class="detail-label">职位</div>
+                                <div class="detail-value">${result.position || '-'}</div>
+                            </div>
+                            <div class="result-detail">
+                                <div class="detail-label">学历</div>
+                                <div class="detail-value">${result.education || '-'}</div>
+                            </div>
+                            ${result.age ? `
+                            <div class="result-detail">
+                                <div class="detail-label">年龄</div>
+                                <div class="detail-value">${result.age}岁</div>
+                            </div>
+                            ` : ''}
+                            ${result.gender ? `
+                            <div class="result-detail">
+                                <div class="detail-label">性别</div>
+                                <div class="detail-value">${result.gender}</div>
+                            </div>
+                            ` : ''}
+                        </div>
+
+                        ${skills.length > 0 ? `
+                        <div class="skills-section">
+                            <div class="skills-label">技能</div>
+                            <div class="skills-tags">
+                                ${skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            resultsContainer.innerHTML = html;
+        }
+
+        function showMessage(message, type = 'success') {
+            const resultsSection = document.getElementById('results-section');
+            const resultsContainer = document.getElementById('results-container');
+            const resultsTitle = document.getElementById('results-title');
+            const resultsSubtitle = document.getElementById('results-subtitle');
+
+            resultsTitle.textContent = type === 'error' ? '操作失败' : '操作成功';
+            resultsSubtitle.textContent = '';
+
+            resultsContainer.innerHTML = `
+                <div class="message message-${type}">
+                    ${message}
+                </div>
+            `;
+
+            resultsSection.style.display = 'block';
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function clearRecommendForm() {
+            document.getElementById('recommend-position').value = '';
+            document.getElementById('recommend-education').value = '';
+            document.getElementById('recommend-experience').value = '2';
+            document.getElementById('recommend-age').value = '35';
+            document.getElementById('recommend-skills').value = '';
+        }
+
+        function clearSearchForm() {
+            document.getElementById('search-position').value = '';
+            document.getElementById('search-education').value = '';
+            document.getElementById('search-gender').value = '';
+            document.getElementById('search-age-min').value = '18';
+            document.getElementById('search-age-max').value = '65';
+            document.getElementById('search-skills').value = '';
+            document.getElementById('search-limit').value = '20';
+        }
+
+        // 模态框相关函数
+        function openModal(resumeId) {
+            fetchResumeDetails(resumeId);
+            document.getElementById('resume-modal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('resume-modal').style.display = 'none';
+        }
+
+        async function fetchResumeDetails(resumeId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/resume/${resumeId}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    displayResumeDetails(data.resume);
+                }
+            } catch (error) {
+                console.error('获取简历详情失败:', error);
+            }
+        }
+
+        function displayResumeDetails(resume) {
+            const modalBody = document.getElementById('modal-body');
+            
+            const renderDetail = (label, value) => {
+                if (value === null || value === 'NULL' || value === undefined || value === '') return '';
+                return `
+                    <div class="modal-detail">
+                        <div class="modal-detail-label">${label}</div>
+                        <div class="modal-detail-value">${value}</div>
+                    </div>
+                `;
+            };
+
+            const renderSkills = (skills, proficiencies) => {
+                if (!skills || skills === 'NULL' || skills === '') return '';
+                const skillList = skills.split(',');
+                const profList = proficiencies ? proficiencies.split(',') : [];
+                
+                return skillList.map((skill, i) => {
+                    if (!skill || skill.trim() === 'NULL') return '';
+                    return `
+                        <span class="modal-skill">
+                            ${skill.trim()}${profList[i] && profList[i].trim() !== 'NULL' ? ` (${profList[i].trim()})` : ''}
+                        </span>
+                    `;
+                }).join('');
+            };
+
+            modalBody.innerHTML = `
+                <div class="modal-section" style="grid-column: span 2">
+                    <div style="font-size: 24px; font-weight: 600; margin-bottom: 16px;">
+                        ${resume.name || '候选人'}
+                    </div>
+                    <div style="margin-bottom: 16px; font-size: 16px;">
+                        ${resume.gender || ''} ${resume.age ? resume.age + '岁' : ''} 
+                        ${resume.phone ? ' | ' + resume.phone : ''} 
+                        ${resume.email ? ' | ' + resume.email : ''}
+                    </div>
+                    
+                    <div style="margin: 16px 0;">
+                        <h3 class="modal-section-title">基本信息</h3>
+                        ${renderDetail('意向岗位', resume.position)}
+                        ${renderDetail('学历层次', resume.education)}
+                        ${renderDetail('院校类别', resume.school_type)}
+                        ${renderDetail('专业类别', resume.major_type)}
+                        ${renderDetail('英语水平', resume.english_level)}
+                    </div>
+
+                    <div style="margin: 16px 0;">
+                        <h3 class="modal-section-title">技能</h3>
+                        ${resume.编程语言 ? `
+                        <div class="modal-subsection">
+                            <div class="modal-subsection-title">编程语言</div>
+                            <div class="modal-skills">
+                                ${renderSkills(resume.编程语言, resume.编程语言熟练度)}
+                            </div>
+                        </div>` : ''}
+                        
+                        ${resume.前端技术 ? `
+                        <div class="modal-subsection">
+                            <div class="modal-subsection-title">前端技术</div>
+                            <div class="modal-skills">
+                                ${renderSkills(resume.前端技术, resume.前端技术熟练度)}
+                            </div>
+                        </div>` : ''}
+                        
+                        ${resume.后端技术 ? `
+                        <div class="modal-subsection">
+                            <div class="modal-subsection-title">后端技术</div>
+                            <div class="modal-skills">
+                                ${renderSkills(resume.后端技术, resume.后端技术熟练度)}
+                            </div>
+                        </div>` : ''}
+                        
+                        ${resume.数据库 ? `
+                        <div class="modal-subsection">
+                            <div class="modal-subsection-title">数据库</div>
+                            <div class="modal-skills">
+                                ${renderSkills(resume.数据库, resume.数据库熟练度)}
+                            </div>
+                        </div>` : ''}
+                        
+                        ${resume.云计算运维 ? `
+                        <div class="modal-subsection">
+                            <div class="modal-subsection-title">云计算/运维</div>
+                            <div class="modal-skills">
+                                ${renderSkills(resume.云计算运维, resume.云计算运维熟练度)}
+                            </div>
+                        </div>` : ''}
+                        
+                        ${resume.数据与算法 ? `
+                        <div class="modal-subsection">
+                            <div class="modal-subsection-title">数据与算法</div>
+                            <div class="modal-skills">
+                                ${renderSkills(resume.数据与算法, resume.数据与算法熟练度)}
+                            </div>
+                        </div>` : ''}
+                        
+                        ${resume.移动开发 ? `
+                        <div class="modal-subsection">
+                            <div class="modal-subsection-title">移动开发</div>
+                            <div class="modal-skills">
+                                ${renderSkills(resume.移动开发, resume.移动开发熟练度)}
+                            </div>
+                        </div>` : ''}
+                        
+                        ${resume.测试工具 ? `
+                        <div class="modal-subsection">
+                            <div class="modal-subsection-title">测试工具</div>
+                            <div class="modal-skills">
+                                ${renderSkills(resume.测试工具, resume.测试工具熟练度)}
+                            </div>
+                        </div>` : ''}
+                    </div>
+
+                    <div style="margin: 16px 0;">
+                        <h3 class="modal-section-title">工作经验</h3>
+                        ${renderDetail('小型企业', resume.小型企业工作经验)}
+                        ${renderDetail('中型企业', resume.中型企业工作经验)}
+                        ${renderDetail('大型企业', resume.大型企业工作经验)}
+                    </div>
+
+                    <div style="margin: 16px 0;">
+                        <h3 class="modal-section-title">项目经验</h3>
+                        ${renderDetail('小规模项目', resume.小规模项目 ? resume.小规模项目 + '个' : '')}
+                        ${renderDetail('中规模项目', resume.中规模项目 ? resume.中规模项目 + '个' : '')}
+                        ${renderDetail('大规模项目', resume.大规模项目 ? resume.大规模项目 + '个' : '')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // 为每个候选人卡片添加点击事件
+        function displayResults(results, title, responseData) {
+            const resultsContainer = document.getElementById('results-container');
+            const resultsTitle = document.getElementById('results-title');
+            const resultsSubtitle = document.getElementById('results-subtitle');
+
+            resultsTitle.textContent = title;
+
+            if (!results || results.length === 0) {
+                resultsSubtitle.textContent = '未找到匹配结果';
+                resultsContainer.innerHTML = `
+                    <div class="message message-error">
+                        未找到符合条件的简历
+                    </div>
+                `;
+                return;
+            }
+
+            resultsSubtitle.textContent = `找到 ${results.length} 位候选人`;
+
+            let html = `<div class="message message-success">推荐完成</div>`;
+
+            results.forEach((result, index) => {
+                const skills = result.skills ?
+                    result.skills.split(' ').filter(s => s && s !== 'NULL').slice(0, 6) : [];
+
+                const score = result.score ? (result.score * 100) :
+                             (result.comprehensive_score ? (result.comprehensive_score * 20) : 75);
+
+                html += `
+                    <div class="result-card" onclick="openModal(${result.resume_id})" style="cursor: pointer;">
+                        <div class="result-header">
+                            <div class="result-name">${result.name || '候选人'}</div>
+                            <div class="result-score">${score.toFixed(0)}%</div>
+                        </div>
+
+                        <div class="result-details">
+                            <div class="result-detail">
+                                <div class="detail-label">职位</div>
+                                <div class="detail-value">${result.position || '-'}</div>
+                            </div>
+                            <div class="result-detail">
+                                <div class="detail-label">学历</div>
+                                <div class="detail-value">${result.education || '-'}</div>
+                            </div>
+                            ${result.age ? `
+                            <div class="result-detail">
+                                <div class="detail-label">年龄</div>
+                                <div class="detail-value">${result.age}岁</div>
+                            </div>
+                            ` : ''}
+                            ${result.gender ? `
+                            <div class="result-detail">
+                                <div class="detail-label">性别</div>
+                                <div class="detail-value">${result.gender}</div>
+                            </div>
+                            ` : ''}
+                        </div>
+
+                        ${skills.length > 0 ? `
+                        <div class="skills-section">
+                            <div class="skills-label">技能</div>
+                            <div class="skills-tags">
+                                ${skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            resultsContainer.innerHTML = html;
+        }
+    </script>
+
+    <!-- 添加模态框结构 -->
+    <div id="resume-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">候选人详情</h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- 详情内容将通过JavaScript动态填充 -->
+            </div>
+        </div>
+    </div>
+</body>
+</html>

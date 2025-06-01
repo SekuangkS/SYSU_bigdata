@@ -1,0 +1,26 @@
+{
+  "training_date": "2025-06-01T17:56:02.616217",
+  "model_type": "DeepRecommendationModel",
+  "framework": "PyTorch",
+  "pytorch_version": "2.3.1+cu121",
+  "data_shape": {
+    "n_samples": 5000,
+    "resume_features": 65,
+    "job_features": 63
+  },
+  "training_params": {
+    "device": "cuda",
+    "epochs_trained": 100,
+    "hidden_dims": [
+      512,
+      256,
+      128
+    ],
+    "use_sigmoid": true
+  },
+  "preprocessing": {
+    "pickle_saved": true,
+    "json_backup_saved": true,
+    "tokenizer_function": "tokenize_chinese"
+  }
+}
